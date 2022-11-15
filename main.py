@@ -1,8 +1,7 @@
-from ddpg_torch import Agent
-import gym
-import numpy as np
-from environment import TaskAllocationEnvironment
 
+import numpy as np
+from environment.environment import TaskAllocationEnvironment
+from model.agent import Agent
 
 env = TaskAllocationEnvironment([1,2,3], 5)
 agent = Agent(alpha=0.000025, beta=0.00025, input_dims=[3], tau=0.001, env=env,
