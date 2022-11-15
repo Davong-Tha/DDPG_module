@@ -57,13 +57,16 @@ class Agent(object):
         self.update_network_parameters(tau=1)
 
     def choose_action(self, observation):
-        self.target_actor.eval()
+        self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
-        mu = self.target_actor.forward(observation).to(self.actor.device)
-        mu_prime = mu + T.tensor(self.noise(),
-                                 dtype=T.float).to(self.actor.device)
+        mu = self.actor.forward(observation).to(self.actor.device)
+        # mu_prime = mu + T.tensor(self.noise(),
+        #                          dtype=T.float).to(self.actor.device)
         mu_prime = mu
-        self.target_actor.train()
+        self.actor.train()
+        self.critic.eval()
+        print('critic value', float(self.critic.forward(observation, mu_prime)))
+        self.critic.train()
         return mu_prime.cpu().detach().numpy()
 
     def remember(self, state, action, reward, new_state, done):
@@ -100,15 +103,16 @@ class Agent(object):
         critic_loss = F.mse_loss(target, critic_value)
         critic_loss.backward()
         self.critic.optimizer.step()
-
         self.critic.eval()
+
         self.actor.optimizer.zero_grad()
         mu = self.actor.forward(state)
         self.actor.train()
-        actor_loss = -self.critic.forward(state, mu)
+        actor_loss = self.critic.forward(state, mu)
         actor_loss = T.mean(actor_loss)
         actor_loss.backward()
         self.actor.optimizer.step()
+        self.actor.eval()
 
         self.update_network_parameters()
 

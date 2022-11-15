@@ -61,6 +61,8 @@ class ActorNetwork(nn.Module):
         x = F.relu(x)
         # x = T.tanh(self.mu(x))
         x = self.mu(x)
-        x = F.softmax(x)
+        x = F.sigmoid(x)
+        m = T.distributions.dirichlet.Dirichlet(x)
 
-        return x
+
+        return m.sample()

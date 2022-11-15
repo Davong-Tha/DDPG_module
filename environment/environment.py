@@ -35,15 +35,15 @@ class TaskAllocationEnvironment(Env):
             self.completion.append(self.task * action[i] / self.cpuPower[i])
 
         reward = 0
-        for i in range(0, self.Num_worker, 2):
+        for i in range(self.Num_worker):
             reward += self.task * action[i] * self.state[i]
 
         done = len(set(self.state)) == 1
         print('reward ', reward)
-        return self.state, reward, done, info
+        return self.state + [self.task], reward, done, info
 
     def observe(self):
-        return self.state
+        return self.state + [self.task]
 
     """
         code from tutorial
