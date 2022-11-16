@@ -268,7 +268,7 @@ class Agent(object):
         actor_state_dict = dict(actor_params)
         target_critic_dict = dict(target_critic_params)
         target_actor_dict = dict(target_actor_params)
-
+        # moving average
         for name in critic_state_dict:
             critic_state_dict[name] = tau * critic_state_dict[name].clone() + \
                                       (1 - tau) * target_critic_dict[name].clone()

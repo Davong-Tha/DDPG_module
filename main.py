@@ -18,7 +18,8 @@ for i in range(1000):
     score = 0
     while not done:
         act = agent.choose_action(obs)
-        print(act)
+        print('observation: ', obs)
+        print('action', act)
         #todo need a way to link action and dataset(the cpu power ranking is working but is not generalize)
 
         new_state, reward, done, info = env.step(act)
