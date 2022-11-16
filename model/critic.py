@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import torch
 import torch.nn as nn
 import torch as T
 import torch.nn.functional as F
@@ -23,6 +24,11 @@ class CriticNetwork(nn.Module):
         # self.fc1.bias.data.uniform_(-f1, f1)
         self.bn1 = nn.LayerNorm(self.fc1_dims)
 
+        self.state_value = nn.Linear(3, self.fc1_dims)
+        temp = 1. / np.sqrt(self.state_value.weight.data.size()[0])
+        T.nn.init.uniform_(self.state_value.weight.data, -temp, temp)
+        T.nn.init.uniform_(self.state_value.bias.data, -temp, temp)
+
         self.fc2 = nn.Linear(self.fc1_dims, 1)
         f2 = 1. / np.sqrt(self.fc2.weight.data.size()[0])
         # f2 = 0.002
@@ -34,9 +40,16 @@ class CriticNetwork(nn.Module):
 
         self.to(self.device)
 
-    def forward(self, action):
+    def forward(self, action, state):
         x = self.fc1(action)
-        x = self.fc2(x)
+
+
+        if (state.shape[0] == 4):
+            state_value = self.state_value(state)
+        else:
+            temp = state[:, 1:]
+            state_value = self.state_value(temp)
+        x = self.fc2(T.add(x, state_value))
 
         return x
 

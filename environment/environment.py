@@ -58,6 +58,7 @@ class TaskAllocationEnvironment(Env):
 
     def allocateTask(self, sort_train, predicted_load_capacity):
         allocation = [0] * predicted_load_capacity
+
         for a in sort_train:
             assign = False
             for i in range(len(predicted_load_capacity)):

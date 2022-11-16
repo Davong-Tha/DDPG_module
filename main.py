@@ -18,7 +18,7 @@ np.random.seed(0)
 def training():
     score = 0
     score_history = []
-    for epoch in range(5):
+    for epoch in range(10):
         print('epoch', epoch)
         for i in range(len(train)):
             game = 0
