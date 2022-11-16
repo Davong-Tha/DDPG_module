@@ -1,12 +1,10 @@
-import torch.nn as nn
 import torch as T
 import torch.nn.functional as F
-from torch import optim
 import numpy as np
 
 from model.ReplayBuffer import ReplayBuffer
-from model.actor import ActorNetwork
-from model.critic import CriticNetwork
+from model.ddpg.actor import ActorNetwork
+from model.ddpg.critic import CriticNetwork
 
 
 class OUActionNoise(object):
