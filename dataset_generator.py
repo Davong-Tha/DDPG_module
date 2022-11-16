@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-np.random.seed(0)
+
 
 class DatasetGenerator:
     def __init__(self, average_load, num_nodes):
