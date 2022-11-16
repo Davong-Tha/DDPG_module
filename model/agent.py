@@ -60,9 +60,9 @@ class Agent(object):
         self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
         mu = self.actor.forward(observation).to(self.actor.device)
-        # mu_prime = mu + T.tensor(self.noise(),
-        #                          dtype=T.float).to(self.actor.device)
-        mu_prime = mu
+        mu_prime = mu + T.tensor(self.noise(),
+                                 dtype=T.float).to(self.actor.device)
+        # mu_prime = mu
         self.actor.train()
         self.critic.eval()
         # print('critic value', float(self.critic.forward(observation, mu_prime)))
@@ -89,8 +89,8 @@ class Agent(object):
         self.target_critic.eval()
         self.critic.eval()
         target_actions = self.target_actor.forward(new_state)
-        critic_value_ = self.target_critic.forward(new_state, target_actions)
-        critic_value = self.critic.forward(state, action)
+        critic_value_ = self.target_critic.forward(target_actions)
+        critic_value = self.critic.forward(action)
 
         target = []
         for j in range(self.batch_size):
@@ -108,7 +108,7 @@ class Agent(object):
         self.actor.optimizer.zero_grad()
         mu = self.actor.forward(state)
         self.actor.train()
-        actor_loss = self.critic.forward(state, mu)
+        actor_loss = self.critic.forward(mu)
         actor_loss = T.mean(actor_loss)
         actor_loss.backward()
         self.actor.optimizer.step()

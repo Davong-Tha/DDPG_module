@@ -12,12 +12,13 @@ def GenerateRandomState(n):
 
 class TaskAllocationEnvironment(Env):
     def __init__(self, cpuPower, ddl):
-        self.cpuPower = cpuPower
+        self.cpuPower = np.array(cpuPower)
         self.Num_worker = len(cpuPower)
         self.state = GenerateRandomState(self.Num_worker)
         self.completion = [1,1,1]
         self.ddl = ddl
-        self.task = 30
+        self.task = []
+        self.taskList = []
     """
         execute action and return next state and reward
         @:param action: a list of task allocation
@@ -26,28 +27,19 @@ class TaskAllocationEnvironment(Env):
         info = ''
         # sort_index = np.argsort(self.taskList)
         # sort_index2 = np.argsort(action)
-        self.completion = []
-        for i in range(self.Num_worker):
-            status = self.task * action[i] / self.cpuPower[i] - self.ddl
-            if self.task * action[i] / self.cpuPower[i] - self.ddl <= 0:
-                self.state[i] = 1
-            else:
-                self.state[i] = 0
-            self.completion.append(self.task * action[i]) #adding completion influence
 
+        allocation = np.array(self.allocateTask(sorted(self.taskList), action))
 
-        reward = 0
-        for i in range(self.Num_worker):
-            reward += self.task * action[i] * self.state[i]
-        cost = 0
-        for i in range(self.Num_worker):
-            cost += self.task * action[i] * (self.state[i] - 1)
+        self.state = allocation / self.cpuPower < self.ddl
+        reward = self.state * allocation
+
         done = all(d == 1 for d in self.state)
         print('reward ', reward)
-        return self.state + [self.task] + self.completion, reward, done, info
+        print('state', self.state)
+        return self.task , float(np.sum(reward)), done, info
 
     def observe(self):
-        return self.state + [self.task] + self.completion
+        return self.task
 
     """
         code from tutorial
@@ -62,5 +54,25 @@ class TaskAllocationEnvironment(Env):
     """
     def reset(self):
         pass
+
+    def allocateTask(self, sort_train, predicted_load_capacity):
+        allocation = [0] * predicted_load_capacity
+        for a in sort_train:
+            assign = False
+            for i in range(len(predicted_load_capacity)):
+                if a < predicted_load_capacity[i] - allocation[i]:
+                    allocation[i] += a
+                    assign = True
+                    break
+
+            if assign:
+                continue
+
+            exceed = []
+            for i in range(len(predicted_load_capacity)):
+                exceed.append(a - predicted_load_capacity[i] + allocation[i])
+            best_exceed = np.argmin(np.array(exceed))
+            allocation[best_exceed] += a
+        return allocation
 
 
