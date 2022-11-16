@@ -34,12 +34,13 @@ class TaskAllocationEnvironment(Env):
         reward = self.state * allocation
 
         done = all(d == 1 for d in self.state)
+        print('allocation', allocation)
         print('reward ', reward)
         print('state', self.state)
-        return self.task , float(np.sum(reward)), done, info
+        return self.task + list(self.state), float(np.sum(reward)), done, info
 
     def observe(self):
-        return self.task
+        return self.task + list(self.state)
 
     """
         code from tutorial
@@ -71,7 +72,7 @@ class TaskAllocationEnvironment(Env):
             exceed = []
             for i in range(len(predicted_load_capacity)):
                 exceed.append(a - predicted_load_capacity[i] + allocation[i])
-            best_exceed = np.argmin(np.array(exceed))
+            best_exceed = np.argmin(np.abs(np.array(exceed)))
             allocation[best_exceed] += a
         return allocation
 

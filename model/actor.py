@@ -34,7 +34,11 @@ class ActorNetwork(nn.Module):
         :return: need to find a way to define action
         """
         x = self.fc1(state)
-        x = torch.div(state, x)
+        if(state.shape[0] == 4):
+            x = torch.div(state[0], x)
+        else:
+            temp = torch.unsqueeze(state[:, 0], dim=1)
+            x = torch.mul(x, 1/temp)
         x = x * 5
         # x = F.relu(x)
         return x

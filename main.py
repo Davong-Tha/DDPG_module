@@ -7,9 +7,9 @@ from environment.environment import TaskAllocationEnvironment
 from model.agent import Agent
 from dataset import data
 
-env = TaskAllocationEnvironment([10, 20, 30], 5)
-agent = Agent(alpha=10e-3, beta=10e-3, input_dims=[1], tau=0.001, env=env,
-              batch_size=64,  layer1_size=200, layer2_size=300, n_actions=3)
+env = TaskAllocationEnvironment([10,20,30], 5)
+agent = Agent(alpha=10e-3, beta=10e-3, actor_input_dims=[1+3], crictic_input_dim=[1], tau=0.001, env=env,
+              batch_size=64,  layer1_size=10, layer2_size=300, n_actions=3)
 
 #agent.load_models()
 np.random.seed(0)
@@ -64,6 +64,7 @@ def eval():
         env.taskList = test[i]
         obs = env.observe()
         act = agent.choose_action(obs)
+        print('action', act)
 
 
         new_state, reward, done, info = env.step(act)
@@ -73,7 +74,7 @@ def eval():
             # env.render()
         score_history.append(score)
     from util import util
-    util.plotLearning(score_history, 'test', window=5)
+    util.plotLearning(score_history, 'test', window=len(score_history))
     print(score)
     print(sum(sum(test,[])))
 

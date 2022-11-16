@@ -31,26 +31,26 @@ class OUActionNoise(object):
 
 
 class Agent(object):
-    def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99,
+    def __init__(self, alpha, beta, actor_input_dims, crictic_input_dim, tau, env, gamma=0.99,
                  n_actions=2, max_size=1000000, layer1_size=400,
                  layer2_size=300, batch_size=64):
         self.noise = OUActionNoise(np.array([0,0,0]))
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(max_size, input_dims, n_actions)
+        self.memory = ReplayBuffer(max_size, actor_input_dims, n_actions)
         self.batch_size = batch_size
 
-        self.actor = ActorNetwork(alpha, input_dims, layer1_size,
+        self.actor = ActorNetwork(alpha, actor_input_dims, layer1_size,
                                   layer2_size, n_actions=n_actions,
                                   name='Actor')
-        self.critic = CriticNetwork(beta, input_dims, layer1_size,
+        self.critic = CriticNetwork(beta, crictic_input_dim, layer1_size,
                                     layer2_size, n_actions=n_actions,
                                     name='Critic')
 
-        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size,
+        self.target_actor = ActorNetwork(alpha, actor_input_dims, layer1_size,
                                          layer2_size, n_actions=n_actions,
                                          name='TargetActor')
-        self.target_critic = CriticNetwork(beta, input_dims, layer1_size,
+        self.target_critic = CriticNetwork(beta, crictic_input_dim, layer1_size,
                                            layer2_size, n_actions=n_actions,
                                            name='TargetCritic')
 
