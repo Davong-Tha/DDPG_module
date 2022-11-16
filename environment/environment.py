@@ -15,7 +15,7 @@ class TaskAllocationEnvironment(Env):
         self.cpuPower = cpuPower
         self.Num_worker = len(cpuPower)
         self.state = GenerateRandomState(self.Num_worker)
-        self.completion = []
+        self.completion = [1,1,1]
         self.ddl = ddl
         self.task = 30
     """
@@ -28,22 +28,26 @@ class TaskAllocationEnvironment(Env):
         # sort_index2 = np.argsort(action)
         self.completion = []
         for i in range(self.Num_worker):
-            if self.task * action[i] / self.cpuPower[i] <= self.ddl:
+            status = self.task * action[i] / self.cpuPower[i] - self.ddl
+            if self.task * action[i] / self.cpuPower[i] - self.ddl <= 0:
                 self.state[i] = 1
             else:
                 self.state[i] = 0
-            self.completion.append(self.task * action[i] / self.cpuPower[i])
+            self.completion.append(self.task * action[i]) #adding completion influence
+
 
         reward = 0
         for i in range(self.Num_worker):
             reward += self.task * action[i] * self.state[i]
-
-        done = len(set(self.state)) == 1
+        cost = 0
+        for i in range(self.Num_worker):
+            cost += self.task * action[i] * (self.state[i] - 1)
+        done = all(d == 1 for d in self.state)
         print('reward ', reward)
-        return self.state + [self.task], reward, done, info
+        return self.state + [self.task] + self.completion, reward, done, info
 
     def observe(self):
-        return self.state + [self.task]
+        return self.state + [self.task] + self.completion
 
     """
         code from tutorial

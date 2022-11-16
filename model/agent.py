@@ -65,7 +65,7 @@ class Agent(object):
         mu_prime = mu
         self.actor.train()
         self.critic.eval()
-        print('critic value', float(self.critic.forward(observation, mu_prime)))
+        # print('critic value', float(self.critic.forward(observation, mu_prime)))
         self.critic.train()
         return mu_prime.cpu().detach().numpy()
 
@@ -140,3 +140,15 @@ class Agent(object):
             actor_state_dict[name] = tau * actor_state_dict[name].clone() + \
                                      (1 - tau) * target_actor_dict[name].clone()
         self.target_actor.load_state_dict(actor_state_dict)
+
+    def save_models(self):
+        self.actor.save_checkpoint()
+        self.target_actor.save_checkpoint()
+        self.critic.save_checkpoint()
+        self.target_critic.save_checkpoint()
+
+    def load_models(self):
+        self.actor.load_checkpoint()
+        self.target_actor.load_checkpoint()
+        self.critic.load_checkpoint()
+        self.target_critic.load_checkpoint()
