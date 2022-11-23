@@ -65,9 +65,10 @@ class Agent(object):
         # mu_prime = mu
         self.actor.train()
         self.critic.eval()
-        # print('critic value', float(self.critic.forward(observation, mu_prime)))
+        critic_value = float(self.critic.forward(mu_prime,observation))
+        print('critic value', critic_value)
         self.critic.train()
-        return mu_prime.cpu().detach().numpy()
+        return mu_prime.cpu().detach().numpy(), critic_value
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)

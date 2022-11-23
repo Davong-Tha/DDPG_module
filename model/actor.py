@@ -4,8 +4,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch as T
-import torch.nn.functional as F
 from torch import optim
+import torch.nn.functional as F
 
 class ActorNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, name,
@@ -22,7 +22,7 @@ class ActorNetwork(nn.Module):
         f1 = 1. / np.sqrt(self.fc1.weight.data.size()[0])
         T.nn.init.uniform_(self.fc1.weight.data, -f1, f1)
         T.nn.init.uniform_(self.fc1.bias.data, -f1, f1)
-        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
+        self.optimizer = optim.Adam(self.parameters(), lr=alpha, weight_decay=0.3)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 
         self.to(self.device)
@@ -31,7 +31,7 @@ class ActorNetwork(nn.Module):
         """
 
         :param state:
-        :return: need to find a way to define action
+        :return: load capacity for each worker
         """
         x = self.fc1(state)
         if(state.shape[0] == 4):

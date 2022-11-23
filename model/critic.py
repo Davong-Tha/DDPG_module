@@ -35,7 +35,7 @@ class CriticNetwork(nn.Module):
         T.nn.init.uniform_(self.fc2.weight.data, -f2, f2)
         T.nn.init.uniform_(self.fc2.bias.data, -f2, f2)
 
-        self.optimizer = optim.Adam(self.parameters(), lr=beta)
+        self.optimizer = optim.Adam(self.parameters(), lr=beta, weight_decay=0.3)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 
         self.to(self.device)
@@ -45,7 +45,7 @@ class CriticNetwork(nn.Module):
 
 
         if (state.shape[0] == 4):
-            state_value = self.state_value(state)
+            state_value = self.state_value(state[1:])
         else:
             temp = state[:, 1:]
             state_value = self.state_value(temp)

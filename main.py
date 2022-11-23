@@ -17,7 +17,9 @@ np.random.seed(0)
 
 def training():
     score = 0
+    crit_value = 0
     score_history = []
+    crit_history = []
     for epoch in range(10):
         print('epoch', epoch)
         for i in range(len(train)):
@@ -29,22 +31,28 @@ def training():
             done = False
 
             while not done and game < 100:
-                act = agent.choose_action(obs)
+                act, crit = agent.choose_action(obs)
                 print('action', act)
                 #todo maximizing q value does not maximize reward
 
                 new_state, reward, done, info = env.step(act)
-                print(new_state)
+                # print(new_state)
                 agent.remember(obs, act, reward, new_state, int(done))
                 agent.learn()
                 score += reward
+                crit_value += crit
                 obs = new_state
                 game += 1
+
                 print('\n')
+            score /= game
+            crit_value /= game
 
 
                 #env.render()
             score_history.append(score)
+            crit_history.append(crit_value)
+
 
             #if i % 25 == 0:
             #    agent.save_models()
@@ -55,6 +63,7 @@ def training():
     from util import util
 
     util.plotLearning(score_history, 'train', window=len(score_history))
+    util.plotLearning(crit_history, 'crit', window=len(crit_history))
 
 def eval():
     score = 0
@@ -63,13 +72,13 @@ def eval():
         env.task = [sum(test[i])]
         env.taskList = test[i]
         obs = env.observe()
-        act = agent.choose_action(obs)
-        print('action', act)
+        act, _ = agent.choose_action(obs)
+        # print('action', act)
 
 
         new_state, reward, done, info = env.step(act)
         score += reward
-        print(new_state)
+        # print(new_state)
 
             # env.render()
         score_history.append(score)
