@@ -50,7 +50,6 @@ class CriticNetwork(nn.Module):
             temp = state[:, 1:]
             state_value = self.state_value(temp)
         x = self.fc2(T.add(x, state_value))
-
         return x
 
     def save_checkpoint(self):

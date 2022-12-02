@@ -3,6 +3,7 @@ import random
 import numpy as np
 from matplotlib import pyplot as plt
 
+import util.util
 from environment.environment import TaskAllocationEnvironment
 from model.agent import Agent
 from dataset import data
@@ -20,7 +21,7 @@ def training():
     crit_value = 0
     score_history = []
     crit_history = []
-    for epoch in range(10):
+    for epoch in range(30):
         print('epoch', epoch)
         for i in range(len(train)):
             game = 0
@@ -32,10 +33,10 @@ def training():
 
             while not done and game < 100:
                 act, crit = agent.choose_action(obs)
-                print('action', act)
+                # print('action', act)
                 #todo maximizing q value does not maximize reward
 
-                new_state, reward, done, info = env.step(act)
+                new_state, reward, done, _, info = env.step(act)
                 # print(new_state)
                 agent.remember(obs, act, reward, new_state, int(done))
                 agent.learn()
@@ -44,7 +45,7 @@ def training():
                 obs = new_state
                 game += 1
 
-                print('\n')
+                # print('\n')
             score /= game
             crit_value /= game
 
@@ -64,9 +65,11 @@ def training():
 
     util.plotLearning(score_history, 'train', window=len(score_history))
     util.plotLearning(crit_history, 'crit', window=len(crit_history))
-
+convergence = []
+convergence_delay = []
 def eval():
     score = 0
+    average_delay = []
     score_history = []
     for i in range(len(test)):
         env.task = [sum(test[i])]
@@ -76,18 +79,23 @@ def eval():
         # print('action', act)
 
 
-        new_state, reward, done, info = env.step(act)
+        new_state, reward, done, delay, info = env.step(act)
         score += reward
+        average_delay.append(delay/len(train[i]))
         # print(new_state)
 
             # env.render()
         score_history.append(score)
     from util import util
-    util.plotLearning(score_history, 'test', window=len(score_history))
+    # util.plotLearning(score_history, 'test', window=len(score_history))
+    # util.plotconvergence(average_delay, score_history, 'covergence')
+    print(sum(average_delay)/len(average_delay))
     print(score)
+    convergence.append(score/sum(sum(test,[])))
+    convergence_delay.append(sum(average_delay)/len(average_delay))
     print(sum(sum(test,[])))
 
-
+from util import util
 if __name__ == '__main__':
     train, test = data.getDataList('dataset/100dataset.txt')
     training()

@@ -13,3 +13,16 @@ def plotLearning(scores, filename, x=None, window=5):
     plt.xlabel('Game')
     plt.plot(x, running_avg)
     plt.savefig(filename)
+
+
+def plotconvergence(delay, score, filename):
+    plt.clf()
+    fig, axs = plt.subplots(2, 1)
+
+    axs[0].plot(range(len(delay)), delay)
+
+    # plt.subplots(122)
+    axs[1].plot(range(len(score)), score)
+
+
+    plt.savefig(filename)

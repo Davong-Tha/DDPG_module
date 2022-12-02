@@ -66,7 +66,7 @@ class Agent(object):
         self.actor.train()
         self.critic.eval()
         critic_value = float(self.critic.forward(mu_prime,observation))
-        print('critic value', critic_value)
+        # print('critic value', critic_value)
         self.critic.train()
         return mu_prime.cpu().detach().numpy(), critic_value
 
