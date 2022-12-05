@@ -1,10 +1,6 @@
 import os
 
 import numpy as np
-import torch.nn as nn
-import torch as T
-import torch.nn.functional as F
-from torch import optim
 
 
 
@@ -39,12 +35,5 @@ class ReplayBuffer(object):
         terminal = self.terminal_memory[batch]
 
         return states, actions, rewards, states_, terminal
-
-
-
-
-
-
-
 
 

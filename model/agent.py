@@ -1,12 +1,12 @@
-import torch.nn as nn
-import torch as T
-import torch.nn.functional as F
-from torch import optim
 import numpy as np
 
 from model.ReplayBuffer import ReplayBuffer
 from model.actor import ActorNetwork
 from model.critic import CriticNetwork
+
+import torch as T
+import torch.nn.functional as F
+
 
 
 class OUActionNoise(object):
@@ -31,41 +31,49 @@ class OUActionNoise(object):
         return 'OrnsteinUhlenbeckActionNoise(mu={}, sigma={})'.format(
                                                             self.mu, self.sigma)
 
+
 class Agent(object):
-    def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99,
+    def __init__(self, alpha, beta, actor_input_dims, crictic_input_dim, tau, env, gamma=0.99,
                  n_actions=2, max_size=1000000, layer1_size=400,
                  layer2_size=300, batch_size=64):
-
+        self.noise = OUActionNoise(np.array([0,0,0]))
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(max_size, input_dims, n_actions)
+        self.memory = ReplayBuffer(max_size, actor_input_dims, n_actions)
         self.batch_size = batch_size
 
-        self.actor = ActorNetwork(alpha, input_dims, layer1_size,
+        self.actor = ActorNetwork(alpha, actor_input_dims, layer1_size,
                                   layer2_size, n_actions=n_actions,
                                   name='Actor')
-        self.critic = CriticNetwork(beta, input_dims, layer1_size,
+        self.critic = CriticNetwork(beta, crictic_input_dim, layer1_size,
                                     layer2_size, n_actions=n_actions,
                                     name='Critic')
 
-        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size,
+        self.target_actor = ActorNetwork(alpha, actor_input_dims, layer1_size,
                                          layer2_size, n_actions=n_actions,
                                          name='TargetActor')
-        self.target_critic = CriticNetwork(beta, input_dims, layer1_size,
+        self.target_critic = CriticNetwork(beta, crictic_input_dim, layer1_size,
+
                                            layer2_size, n_actions=n_actions,
                                            name='TargetCritic')
 
         self.update_network_parameters(tau=1)
 
     def choose_action(self, observation):
-        self.target_actor.eval()
+
+        self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
-        mu = self.target_actor.forward(observation).to(self.actor.device)
-        # mu_prime = mu + T.tensor(self.noise(),
-        #                          dtype=T.float).to(self.actor.device)
-        mu_prime = mu
+        mu = self.actor.forward(observation).to(self.actor.device)
+        mu_prime = mu + T.tensor(self.noise(),
+                                 dtype=T.float).to(self.actor.device)
+        # mu_prime = mu
         self.actor.train()
-        return mu_prime.cpu().detach().numpy()
+        self.critic.eval()
+        critic_value = float(self.critic.forward(mu_prime,observation))
+        # print('critic value', critic_value)
+        self.critic.train()
+        return mu_prime.cpu().detach().numpy(), critic_value
+
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
@@ -87,8 +95,10 @@ class Agent(object):
         self.target_critic.eval()
         self.critic.eval()
         target_actions = self.target_actor.forward(new_state)
-        critic_value_ = self.target_critic.forward(new_state, target_actions)
-        critic_value = self.critic.forward(state, action)
+
+        critic_value_ = self.target_critic.forward(target_actions, new_state)
+        critic_value = self.critic.forward(action, state)
+
 
         target = []
         for j in range(self.batch_size):
@@ -103,13 +113,16 @@ class Agent(object):
         self.critic.optimizer.step()
 
         self.critic.eval()
+
         self.actor.optimizer.zero_grad()
         mu = self.actor.forward(state)
         self.actor.train()
-        actor_loss = -self.critic.forward(state, mu)
+        actor_loss = self.critic.forward(mu, state)
         actor_loss = T.mean(actor_loss)
         actor_loss.backward()
         self.actor.optimizer.step()
+        self.actor.eval()
+
 
         self.update_network_parameters()
 
@@ -136,4 +149,18 @@ class Agent(object):
         for name in actor_state_dict:
             actor_state_dict[name] = tau * actor_state_dict[name].clone() + \
                                      (1 - tau) * target_actor_dict[name].clone()
+
         self.target_actor.load_state_dict(actor_state_dict)
+
+    def save_models(self):
+        self.actor.save_checkpoint()
+        self.target_actor.save_checkpoint()
+        self.critic.save_checkpoint()
+        self.target_critic.save_checkpoint()
+
+    def load_models(self):
+        self.actor.load_checkpoint()
+        self.target_actor.load_checkpoint()
+        self.critic.load_checkpoint()
+        self.target_critic.load_checkpoint()
+
