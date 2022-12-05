@@ -36,7 +36,7 @@ def training():
                 # print('action', act)
                 #todo maximizing q value does not maximize reward
 
-                new_state, reward, done, _, info = env.step(act)
+                new_state, reward, done, _, info = env.step(act, False)
                 # print(new_state)
                 agent.remember(obs, act, reward, new_state, int(done))
                 agent.learn()
@@ -79,7 +79,7 @@ def eval():
         # print('action', act)
 
 
-        new_state, reward, done, delay, info = env.step(act)
+        new_state, reward, done, delay, info = env.step(act, True)
         score += reward
         average_delay.append(delay/len(train[i]))
         # print(new_state)
@@ -98,10 +98,10 @@ def eval():
 from util import util
 if __name__ == '__main__':
     cpu , train, test = data.getDataFromCSV('dataset/dataset1000.csv')
-    env = TaskAllocationEnvironment(cpu, 5)
+    env = TaskAllocationEnvironment(cpu, 2)
     agent = Agent(alpha=10e-3, beta=10e-3, actor_input_dims=[1 + len(cpu)], crictic_input_dim=[1+len(cpu)], tau=0.001, env=env,
                   batch_size=64, layer1_size=10, layer2_size=300, n_actions=len(cpu))
     training()
     eval()
-
+    agent.save_models()
 

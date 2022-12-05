@@ -49,7 +49,7 @@ class DatasetGenerator:
 
 
 if __name__ == '__main__':
-    d = DatasetGenerator(500,  10, 500)
+    d = DatasetGenerator(500,  5, 500)
     data =[]
     for i in range(1000):
         data.append(d.get_random_task())
