@@ -12,6 +12,7 @@ def GenerateRandomState(n):
 
 class TaskAllocationEnvironment(Env):
     def __init__(self, cpuPower, ddl):
+
         self.cpuPower = np.array(cpuPower)
         self.Num_worker = len(cpuPower)
         self.state = GenerateRandomState(self.Num_worker)
@@ -25,6 +26,7 @@ class TaskAllocationEnvironment(Env):
     """
     def step(self, action):
         info = ''
+
         # sort_index = np.argsort(self.taskList)
         # sort_index2 = np.argsort(action)
 
@@ -42,6 +44,7 @@ class TaskAllocationEnvironment(Env):
     def observe(self):
         return self.task + list(self.state)
 
+
     """
         code from tutorial
         for environment visualization, not needed yet
@@ -55,6 +58,7 @@ class TaskAllocationEnvironment(Env):
     """
     def reset(self):
         pass
+
 
     def allocateTask(self, sort_train, predicted_load_capacity):
         allocation = [0] * predicted_load_capacity
@@ -76,5 +80,6 @@ class TaskAllocationEnvironment(Env):
             best_exceed = np.argmin(np.abs(np.array(exceed)))
             allocation[best_exceed] += a
         return allocation
+
 
 

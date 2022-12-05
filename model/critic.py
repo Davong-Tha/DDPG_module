@@ -1,6 +1,8 @@
 import os
+
 import numpy as np
 import torch
+
 import torch.nn as nn
 import torch as T
 import torch.nn.functional as F
@@ -16,7 +18,9 @@ class CriticNetwork(nn.Module):
         self.n_actions = n_actions
         self.checkpoint_file = os.path.join(chkpt_dir, name + '_ddpg')
 
+
         self.fc1 = nn.Linear(3, self.fc1_dims)
+
         f1 = 1. / np.sqrt(self.fc1.weight.data.size()[0])
         T.nn.init.uniform_(self.fc1.weight.data, -f1, f1)
         T.nn.init.uniform_(self.fc1.bias.data, -f1, f1)
@@ -24,21 +28,26 @@ class CriticNetwork(nn.Module):
         # self.fc1.bias.data.uniform_(-f1, f1)
         self.bn1 = nn.LayerNorm(self.fc1_dims)
 
+
         self.state_value = nn.Linear(3, self.fc1_dims)
         temp = 1. / np.sqrt(self.state_value.weight.data.size()[0])
         T.nn.init.uniform_(self.state_value.weight.data, -temp, temp)
         T.nn.init.uniform_(self.state_value.bias.data, -temp, temp)
 
         self.fc2 = nn.Linear(self.fc1_dims, 1)
+
         f2 = 1. / np.sqrt(self.fc2.weight.data.size()[0])
         # f2 = 0.002
         T.nn.init.uniform_(self.fc2.weight.data, -f2, f2)
         T.nn.init.uniform_(self.fc2.bias.data, -f2, f2)
 
+
         self.optimizer = optim.Adam(self.parameters(), lr=beta, weight_decay=0.3)
+
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 
         self.to(self.device)
+
 
     def forward(self, action, state):
         x = self.fc1(action)
@@ -59,3 +68,4 @@ class CriticNetwork(nn.Module):
     def load_checkpoint(self):
         print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
+

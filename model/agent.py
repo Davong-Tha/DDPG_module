@@ -3,8 +3,10 @@ import numpy as np
 from model.ReplayBuffer import ReplayBuffer
 from model.actor import ActorNetwork
 from model.critic import CriticNetwork
+
 import torch as T
 import torch.nn.functional as F
+
 
 
 class OUActionNoise(object):
@@ -51,12 +53,14 @@ class Agent(object):
                                          layer2_size, n_actions=n_actions,
                                          name='TargetActor')
         self.target_critic = CriticNetwork(beta, crictic_input_dim, layer1_size,
+
                                            layer2_size, n_actions=n_actions,
                                            name='TargetCritic')
 
         self.update_network_parameters(tau=1)
 
     def choose_action(self, observation):
+
         self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
         mu = self.actor.forward(observation).to(self.actor.device)
@@ -69,6 +73,7 @@ class Agent(object):
         # print('critic value', critic_value)
         self.critic.train()
         return mu_prime.cpu().detach().numpy(), critic_value
+
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
@@ -90,8 +95,10 @@ class Agent(object):
         self.target_critic.eval()
         self.critic.eval()
         target_actions = self.target_actor.forward(new_state)
+
         critic_value_ = self.target_critic.forward(target_actions, new_state)
         critic_value = self.critic.forward(action, state)
+
 
         target = []
         for j in range(self.batch_size):
@@ -104,6 +111,7 @@ class Agent(object):
         critic_loss = F.mse_loss(target, critic_value)
         critic_loss.backward()
         self.critic.optimizer.step()
+
         self.critic.eval()
 
         self.actor.optimizer.zero_grad()
@@ -114,6 +122,7 @@ class Agent(object):
         actor_loss.backward()
         self.actor.optimizer.step()
         self.actor.eval()
+
 
         self.update_network_parameters()
 
@@ -140,6 +149,7 @@ class Agent(object):
         for name in actor_state_dict:
             actor_state_dict[name] = tau * actor_state_dict[name].clone() + \
                                      (1 - tau) * target_actor_dict[name].clone()
+
         self.target_actor.load_state_dict(actor_state_dict)
 
     def save_models(self):
@@ -153,3 +163,4 @@ class Agent(object):
         self.target_actor.load_checkpoint()
         self.critic.load_checkpoint()
         self.target_critic.load_checkpoint()
+

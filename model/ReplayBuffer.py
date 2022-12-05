@@ -1,5 +1,7 @@
 import os
+
 import numpy as np
+
 
 
 class ReplayBuffer(object):
@@ -33,3 +35,5 @@ class ReplayBuffer(object):
         terminal = self.terminal_memory[batch]
 
         return states, actions, rewards, states_, terminal
+
+

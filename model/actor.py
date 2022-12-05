@@ -1,11 +1,13 @@
 import os
 
 import numpy as np
+
 import torch
 import torch.nn as nn
 import torch as T
 from torch import optim
 import torch.nn.functional as F
+
 
 class ActorNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, name,
@@ -18,11 +20,13 @@ class ActorNetwork(nn.Module):
         self.n_actions = n_actions
         self.checkpoint_file = os.path.join(chkpt_dir, name + '_ddpg')
 
+
         self.fc1 = nn.Linear(*self.input_dims, self.n_actions)
         f1 = 1. / np.sqrt(self.fc1.weight.data.size()[0])
         T.nn.init.uniform_(self.fc1.weight.data, -f1, f1)
         T.nn.init.uniform_(self.fc1.bias.data, -f1, f1)
         self.optimizer = optim.Adam(self.parameters(), lr=alpha, weight_decay=0.3)
+
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
 
         self.to(self.device)
@@ -31,6 +35,7 @@ class ActorNetwork(nn.Module):
         """
 
         :param state:
+
         :return: load capacity for each worker
         """
         x = self.fc1(state)
@@ -50,3 +55,4 @@ class ActorNetwork(nn.Module):
     def load_checkpoint(self):
         print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
+

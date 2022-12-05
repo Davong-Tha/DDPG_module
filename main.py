@@ -1,3 +1,4 @@
+
 import random
 
 import numpy as np
@@ -7,6 +8,7 @@ import util.util
 from environment.environment import TaskAllocationEnvironment
 from model.agent import Agent
 from dataset import data
+
 
 env = TaskAllocationEnvironment([10,20,30], 5)
 agent = Agent(alpha=10e-3, beta=10e-3, actor_input_dims=[1+3], crictic_input_dim=[1], tau=0.001, env=env,
