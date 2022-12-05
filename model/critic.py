@@ -19,7 +19,7 @@ class CriticNetwork(nn.Module):
         self.checkpoint_file = os.path.join(chkpt_dir, name + '_ddpg')
 
 
-        self.fc1 = nn.Linear(3, self.fc1_dims)
+        self.fc1 = nn.Linear(input_dims[0]-1, self.fc1_dims)
 
         f1 = 1. / np.sqrt(self.fc1.weight.data.size()[0])
         T.nn.init.uniform_(self.fc1.weight.data, -f1, f1)
@@ -29,7 +29,7 @@ class CriticNetwork(nn.Module):
         self.bn1 = nn.LayerNorm(self.fc1_dims)
 
 
-        self.state_value = nn.Linear(3, self.fc1_dims)
+        self.state_value = nn.Linear(input_dims[0]-1, self.fc1_dims)
         temp = 1. / np.sqrt(self.state_value.weight.data.size()[0])
         T.nn.init.uniform_(self.state_value.weight.data, -temp, temp)
         T.nn.init.uniform_(self.state_value.bias.data, -temp, temp)
@@ -53,7 +53,7 @@ class CriticNetwork(nn.Module):
         x = self.fc1(action)
 
 
-        if (state.shape[0] == 4):
+        if (len(state.shape) == 1):
             state_value = self.state_value(state[1:])
         else:
             temp = state[:, 1:]

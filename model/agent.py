@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 from model.ReplayBuffer import ReplayBuffer
@@ -36,7 +38,7 @@ class Agent(object):
     def __init__(self, alpha, beta, actor_input_dims, crictic_input_dim, tau, env, gamma=0.99,
                  n_actions=2, max_size=1000000, layer1_size=400,
                  layer2_size=300, batch_size=64):
-        self.noise = OUActionNoise(np.array([0,0,0]))
+        self.noise = OUActionNoise(np.array([0]*n_actions))
         self.gamma = gamma
         self.tau = tau
         self.memory = ReplayBuffer(max_size, actor_input_dims, n_actions)
