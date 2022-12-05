@@ -1,4 +1,4 @@
-
+import math
 import random
 
 import numpy as np
@@ -10,9 +10,7 @@ from model.agent import Agent
 from dataset import data
 
 
-env = TaskAllocationEnvironment([10,20,30], 5)
-agent = Agent(alpha=10e-3, beta=10e-3, actor_input_dims=[1+3], crictic_input_dim=[1], tau=0.001, env=env,
-              batch_size=64,  layer1_size=10, layer2_size=300, n_actions=3)
+
 
 #agent.load_models()
 np.random.seed(0)
@@ -99,7 +97,10 @@ def eval():
 
 from util import util
 if __name__ == '__main__':
-    train, test = data.getDataList('dataset/100dataset.txt')
+    cpu , train, test = data.getDataFromCSV('dataset/dataset1000.csv')
+    env = TaskAllocationEnvironment(cpu, 5)
+    agent = Agent(alpha=10e-3, beta=10e-3, actor_input_dims=[1 + len(cpu)], crictic_input_dim=[1+len(cpu)], tau=0.001, env=env,
+                  batch_size=64, layer1_size=10, layer2_size=300, n_actions=len(cpu))
     training()
     eval()
 

@@ -39,7 +39,7 @@ class ActorNetwork(nn.Module):
         :return: load capacity for each worker
         """
         x = self.fc1(state)
-        if(state.shape[0] == 4):
+        if(len(state.shape) == 1):
             x = torch.div(state[0], x)
         else:
             temp = torch.unsqueeze(state[:, 0], dim=1)
