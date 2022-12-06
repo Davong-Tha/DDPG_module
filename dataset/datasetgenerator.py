@@ -49,7 +49,7 @@ class DatasetGenerator:
 
 
 if __name__ == '__main__':
-    d = DatasetGenerator(500,  5, 500)
+    d = DatasetGenerator(500,  3, 500)
     data =[]
     for i in range(1000):
         data.append(d.get_random_task())
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     avg = sum(sum(data,[]))/sum(len(x) for x in data)
     d.cpu_power = [int(np.random.default_rng().normal(avg, 15)) for i in range(d.num_nodes)]
 
-    with open('dataset1000.csv', 'w', newline='') as f:
+    with open('dataset10003node.csv', 'w', newline='') as f:
         write = csv.writer(f)
         # using csv.writer method from CSV package
         write.writerow(list(d.cpu_power))

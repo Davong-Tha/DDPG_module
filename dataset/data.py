@@ -30,6 +30,7 @@ def getDataFromCSV(file):
     data = data[1:]
     data = [list(map(int,i)) for i in data]
     train, test= train_test_split(data, test_size=0.2)
+    # print(sum(sum(data,[]))/sum(len(x) for x in data))
     return cpu, train, test
 
 if __name__ == '__main__':
