@@ -8,6 +8,7 @@ import util.util
 from environment.environment import TaskAllocationEnvironment
 from model.agent import Agent
 from dataset import data
+from HungarianMethod.HungarianMethod import HungarianMethod
 
 
 
@@ -16,17 +17,35 @@ from dataset import data
 np.random.seed(0)
 
 
+def setDeadLine(data):
+    optimal_allocation = h.allocate(data, len(env.cpuPower), env.cpuPower)
+    max_ddl = 0
+    for index, sol in enumerate(optimal_allocation):
+        if len(sol) > 0:
+            tasks = []
+            for i in sol:
+                tasks.append(data[i])
+            ddl = sum(tasks) / env.cpuPower[index]
+            if ddl > max_ddl:
+                max_ddl = ddl
+    env.ddl = max_ddl
+    return optimal_allocation, env.ddl
+
 def training():
     score = 0
     crit_value = 0
     score_history = []
     crit_history = []
+
     for epoch in range(30):
         print('epoch', epoch)
         for i in range(len(train)):
             game = 0
             #todo use sum of task to predict delay
             env.task = [sum(train[i])]
+            temp = setDeadLine(train[i])
+
+
             env.taskList = train[i]
             obs = env.observe()
             done = False
@@ -74,6 +93,7 @@ def eval():
     for i in range(len(test)):
         env.task = [sum(test[i])]
         env.taskList = test[i]
+        print(setDeadLine(test[i]))
         obs = env.observe()
         act, _ = agent.choose_action(obs)
         # print('action', act)
@@ -97,10 +117,11 @@ def eval():
 
 from util import util
 if __name__ == '__main__':
-    cpu , train, test = data.getDataFromCSV('dataset/dataset10003node.csv')
+    cpu , train, test = data.getDataFromCSV('dataset/dataset1000.csv')
     env = TaskAllocationEnvironment(cpu, 1.5)
     agent = Agent(alpha=10e-3, beta=10e-3, actor_input_dims=[1 + len(cpu)], crictic_input_dim=[1+len(cpu)], tau=0.001, env=env,
                   batch_size=64, layer1_size=10, layer2_size=300, n_actions=len(cpu))
+    h = HungarianMethod()
     training()
     eval()
     agent.save_models()

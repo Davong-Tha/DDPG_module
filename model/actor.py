@@ -20,7 +20,6 @@ class ActorNetwork(nn.Module):
         self.n_actions = n_actions
         self.checkpoint_file = os.path.join(chkpt_dir, name + '_ddpg')
 
-
         self.fc1 = nn.Linear(*self.input_dims, self.n_actions)
         f1 = 1. / np.sqrt(self.fc1.weight.data.size()[0])
         T.nn.init.uniform_(self.fc1.weight.data, -f1, f1)
@@ -39,11 +38,11 @@ class ActorNetwork(nn.Module):
         :return: load capacity for each worker
         """
         x = self.fc1(state)
-        if(len(state.shape) == 1):
+        if (len(state.shape) == 1):
             x = torch.div(state[0], x)
         else:
             temp = torch.unsqueeze(state[:, 0], dim=1)
-            x = torch.mul(x, 1/temp)
+            x = torch.mul(x, 1 / temp)
         x = x * 5
         # x = F.relu(x)
         return x
@@ -55,4 +54,3 @@ class ActorNetwork(nn.Module):
     def load_checkpoint(self):
         print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
-

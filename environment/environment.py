@@ -37,9 +37,11 @@ class TaskAllocationEnvironment(Env):
 
         done = all(d == 1 for d in self.state)
         if debug:
+            print(self.taskList)
             print('allocation', allocation)
             print('reward ', reward)
             print('state', self.state)
+            print('\n')
         return self.task + list(self.state), float(np.sum(reward)), done, delay, info
 
     def observe(self):

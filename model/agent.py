@@ -120,6 +120,7 @@ class Agent(object):
         mu = self.actor.forward(state)
         self.actor.train()
         actor_loss = self.critic.forward(mu, state)
+        #we want to maximize Q value
         actor_loss = T.mean(actor_loss)
         actor_loss.backward()
         self.actor.optimizer.step()

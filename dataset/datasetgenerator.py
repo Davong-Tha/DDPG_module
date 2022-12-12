@@ -31,7 +31,8 @@ class DatasetGenerator:
 
         return result
 
-    def generate_cost_matrix(self, tasks, l_max=1):
+    @staticmethod
+    def generate_cost_matrix(tasks, num_nodes, cpu_power, l_max=1):
         """
 
         Default case: l_max=1, the cost matrix is built as follows
@@ -42,9 +43,9 @@ class DatasetGenerator:
         """
         cost_matrix = []
         # tasks = self.get_random_task()
-        for i in range(self.num_nodes):
+        for i in range(num_nodes):
             for j in range(l_max):
-              cost_matrix.append([task / self.cpu_power[i] for task in tasks])
+              cost_matrix.append([task / cpu_power[i] for task in tasks])
         return cost_matrix
 
 
@@ -55,7 +56,7 @@ if __name__ == '__main__':
         data.append(d.get_random_task())
 
     avg = sum(sum(data,[]))/sum(len(x) for x in data)
-    d.cpu_power = [int(np.random.default_rng().normal(avg*0.7, 15)) for i in range(3)]
+    d.cpu_power = [int(np.random.default_rng().normal(avg*2, 15)) for i in range(3)]
 
     with open('dataset10003node.csv', 'w', newline='') as f:
         write = csv.writer(f)
