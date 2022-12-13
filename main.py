@@ -9,6 +9,7 @@ from environment.environment import TaskAllocationEnvironment
 from model.agent import Agent
 from dataset import data
 from HungarianMethod.HungarianMethod import HungarianMethod
+from tqdm import tqdm
 
 
 
@@ -38,8 +39,8 @@ def training():
     crit_history = []
 
     for epoch in range(30):
-        print('epoch', epoch)
-        for i in range(len(train)):
+        # print('epoch', epoch)
+        for i in tqdm(range(len(train))):
             game = 0
             #todo use sum of task to predict delay
             env.task = [sum(train[i])]
@@ -72,13 +73,14 @@ def training():
                 #env.render()
             score_history.append(score)
             crit_history.append(crit_value)
+        eval()
 
 
             #if i % 25 == 0:
             #    agent.save_models()
-            print('\033[92m' + 'terminal' + str(game)+ '\033[0m')
-            print('episode ', i, 'score %.2f' % score,
-                  'trailing 100 games avg %.3f ' % np.mean(score_history[-100:]))
+            # print('\033[92m' + 'terminal' + str(game)+ '\033[0m')
+            # print('episode ', i, 'score %.2f' % score,
+            #       'trailing 100 games avg %.3f ' % np.mean(score_history[-100:]))
 
     from util import util
 
@@ -99,7 +101,7 @@ def eval():
         # print('action', act)
 
 
-        new_state, reward, done, delay, info = env.step(act, True)
+        new_state, reward, done, delay, info = env.step(act, False, True)
         score += reward
         average_delay.append(delay/len(train[i]))
         # print(new_state)
@@ -117,11 +119,10 @@ def eval():
 
 from util import util
 if __name__ == '__main__':
-    cpu , train, test = data.getDataFromCSV('dataset/dataset1000.csv')
+    cpu , train, test = data.getDataFromCSV('dataset/convergence.csv')
     env = TaskAllocationEnvironment(cpu, 1.5)
     agent = Agent(alpha=10e-3, beta=10e-3, actor_input_dims=[1 + len(cpu)], crictic_input_dim=[1+len(cpu)], tau=0.001, env=env,
                   batch_size=64, layer1_size=10, layer2_size=300, n_actions=len(cpu))
     h = HungarianMethod()
     training()
-    eval()
     agent.save_models()
