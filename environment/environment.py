@@ -20,6 +20,8 @@ class TaskAllocationEnvironment(Env):
         self.ddl = ddl
         self.task = []
         self.taskList = []
+
+
     """
         execute action and return next state and reward
         @:param action: a list of task allocation
@@ -31,7 +33,7 @@ class TaskAllocationEnvironment(Env):
         # sort_index2 = np.argsort(action)
 
         allocation = np.array(self.allocateTask(sorted(self.taskList), action))
-        delay = float(np.sum(allocation / self.cpuPower))
+        delay = float(np.max(allocation / self.cpuPower))
         self.state = allocation / self.cpuPower <= self.ddl
         reward = self.state * allocation
 
@@ -42,8 +44,7 @@ class TaskAllocationEnvironment(Env):
             print('reward ', reward)
             print('state', self.state)
             print('\n')
-        if show_delay:
-            print(np.max(allocation / self.cpuPower))
+
         return self.task + list(self.state), float(np.sum(reward)), done, delay, info
 
     def observe(self):

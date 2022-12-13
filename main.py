@@ -90,12 +90,12 @@ convergence = []
 convergence_delay = []
 def eval():
     score = 0
-    average_delay = []
+    max_delay = []
     score_history = []
     for i in range(len(test)):
         env.task = [sum(test[i])]
         env.taskList = test[i]
-        print(setDeadLine(test[i]))
+        # print(setDeadLine(test[i]))
         obs = env.observe()
         act, _ = agent.choose_action(obs)
         # print('action', act)
@@ -103,7 +103,8 @@ def eval():
 
         new_state, reward, done, delay, info = env.step(act, False, True)
         score += reward
-        average_delay.append(delay/len(train[i]))
+        max_delay.append(delay)
+        print(delay)
         # print(new_state)
 
             # env.render()
@@ -111,10 +112,10 @@ def eval():
     from util import util
     # util.plotLearning(score_history, 'test', window=len(score_history))
     # util.plotconvergence(average_delay, score_history, 'covergence')
-    print(sum(average_delay)/len(average_delay))
+    # print(sum(average_delay)/len(average_delay))
     print(score)
     convergence.append(score/sum(sum(test,[])))
-    convergence_delay.append(sum(average_delay)/len(average_delay))
+    # convergence_delay.append(sum(average_delay)/len(average_delay))
     print(sum(sum(test,[])))
 
 from util import util
