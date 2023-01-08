@@ -61,11 +61,11 @@ class Agent(object):
 
         self.update_network_parameters(tau=1)
 
-    def choose_action(self, observation):
+    def choose_action(self, observation, ddl=None):
 
         self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
-        mu = self.actor.forward(observation).to(self.actor.device)
+        mu = self.actor.forward(observation, ddl).to(self.actor.device)
         mu_prime = mu + T.tensor(self.noise(),
                                  dtype=T.float).to(self.actor.device)
         # mu_prime = mu
@@ -77,14 +77,14 @@ class Agent(object):
         return mu_prime.cpu().detach().numpy(), critic_value
 
 
-    def remember(self, state, action, reward, new_state, done):
-        self.memory.store_transition(state, action, reward, new_state, done)
+    def remember(self, state, action, reward, new_state, done, ddl):
+        self.memory.store_transition(state, action, reward, new_state, done, ddl)
 
     def learn(self):
         if self.memory.mem_cntr < self.batch_size:
             return
 
-        state, action, reward, new_state, done = \
+        state, action, reward, new_state, done, ddl = \
             self.memory.sample_buffer(self.batch_size)
 
         reward = T.tensor(reward, dtype=T.float).to(self.critic.device)
@@ -96,7 +96,7 @@ class Agent(object):
         self.target_actor.eval()
         self.target_critic.eval()
         self.critic.eval()
-        target_actions = self.target_actor.forward(new_state)
+        target_actions = self.target_actor.forward(new_state, ddl)
 
         critic_value_ = self.target_critic.forward(target_actions, new_state)
         critic_value = self.critic.forward(action, state)
@@ -117,11 +117,15 @@ class Agent(object):
         self.critic.eval()
 
         self.actor.optimizer.zero_grad()
-        mu = self.actor.forward(state)
+        mu = self.actor.forward(state, ddl)
         self.actor.train()
         actor_loss = self.critic.forward(mu, state)
+        # temp = T.tensor([91,102,89]).repeat(len(ddl), 1)
+        # actor_loss2 = (T.abs(temp * ddl[:, None] - mu))
+        # actor_loss2 = actor_loss2.sum(1)
+
         #we want to maximize Q value
-        actor_loss = T.mean(actor_loss)
+        actor_loss = T.mean(actor_loss)  #+ actor_loss2
         actor_loss.backward()
         self.actor.optimizer.step()
         self.actor.eval()

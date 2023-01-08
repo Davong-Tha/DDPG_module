@@ -4,6 +4,9 @@ import random
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+# import torch_xla
+# import torch_xla.core.xla_model as xm
+# self.device = xm.xla_device()
 
 def getDataList(file):
     f = open(file,'r')

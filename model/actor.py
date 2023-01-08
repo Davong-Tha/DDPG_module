@@ -30,7 +30,7 @@ class ActorNetwork(nn.Module):
 
         self.to(self.device)
 
-    def forward(self, state):
+    def forward(self, state, ddl=None):
         """
 
         :param state:
@@ -40,10 +40,13 @@ class ActorNetwork(nn.Module):
         x = self.fc1(state)
         if (len(state.shape) == 1):
             x = torch.div(state[0], x)
+            # x = x * ddl
         else:
             temp = torch.unsqueeze(state[:, 0], dim=1)
             x = torch.mul(x, 1 / temp)
-        x = x * 5
+            # x = x * T.tensor(ddl, dtype=torch.float32)[:, None]
+        # 5 is the ddl
+
         # x = F.relu(x)
         return x
 

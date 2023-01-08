@@ -13,8 +13,9 @@ class ReplayBuffer(object):
         self.action_memory = np.zeros((self.mem_size, n_actions))
         self.reward_memory = np.zeros(self.mem_size)
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.float32)
+        self.ddl = np.zeros(self.mem_size, dtype=np.float32)
 
-    def store_transition(self, state, action, reward, state_, done):
+    def store_transition(self, state, action, reward, state_, done, ddl):
         index = self.mem_cntr % self.mem_size
         self.state_memory[index] = state
         self.new_state_memory[index] = state_
@@ -22,6 +23,7 @@ class ReplayBuffer(object):
         self.reward_memory[index] = reward
         self.terminal_memory[index] = 1 - done
         self.mem_cntr += 1
+        self.ddl[index] = ddl
 
     def sample_buffer(self, batch_size):
         max_mem = min(self.mem_cntr, self.mem_size)
@@ -33,7 +35,8 @@ class ReplayBuffer(object):
         rewards = self.reward_memory[batch]
         states_ = self.new_state_memory[batch]
         terminal = self.terminal_memory[batch]
+        ddl = self.ddl[batch]
 
-        return states, actions, rewards, states_, terminal
+        return states, actions, rewards, states_, terminal, ddl
 
 
